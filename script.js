@@ -24,7 +24,7 @@ Array.from(dropdown).forEach(
 
 let laptops = [];
 function getSelectedItem(item) {
-    axios.get(`http://www.whateverorigin.org/get?url=https://www.amazon.com/s?i=computers-intl-ship&bbn=16225007011&rh=n%3A16225007011%2Cn%3A13896617011%2Cn%3A565108%2Cp_89%3A${item}&dc&qid=1627208606&rnid=13896617011&ref=sr_nr_n_2`)
+    axios.get(`https://api.allorigins.win/get?url=https://www.amazon.com/s?i=computers-intl-ship&bbn=16225007011&rh=n%3A16225007011%2Cn%3A13896617011%2Cn%3A565108%2Cp_89%3A${item}&dc&qid=1627208606&rnid=13896617011&ref=sr_nr_n_2`)
         .then((response) => {
             console.log(response)
             htmlData = response.data;
