@@ -1,3 +1,4 @@
+// variables
 let selectItem;
 let htmlDom;
 let htmlData;
@@ -10,26 +11,56 @@ let link;
 
 let dropdown = document.getElementsByClassName("dropdown-menu")
 let itemswrap = document.getElementById("items-wrap");
+let modal = document.getElementById('exampleModal');
+let mContent = document.getElementById('mContent');
 
+
+// dropdown item click handler
 Array.from(dropdown).forEach(
     function (element, index, array) {
         element.addEventListener('click', (e) => {
             e.preventDefault();
             selectItem = e.target.textContent;
-            console.log(selectItem);
-            getSelectedItem(selectItem);
+            let url = `https://www.amazon.com/s?i=computers-intl-ship&bbn=16225007011&rh=n%3A16225007011%2Cn%3A13896617011%2Cn%3A565108%2Cp_89%3A${selectItem}&dc&qid=1627208606&rnid=13896617011&ref=sr_nr_n_2`
+            getSelectedItem(url);
         })
     }
 )
 
+// more info event handler
+modal.addEventListener('show.bs.modal', function (event) {
+    mContent.innerHTML = `<div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel" style="color:#0e1e25; font: 600 1rem 'Raleway', sans-serif;">Data Loading ...</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card mb-3">
+                        <div class="row g-0">
+                            <div class="col-md-6">
+                                <img src="/images/loader.gif" class="img-fluid rounded-start" alt="...">
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card-body">
+                                    <h5 class="card-title">Specs</h5>
+                                    <div> ... </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+    var button = event.relatedTarget
+    var itemLink = button.getAttribute('data-bs-whatever')
+    getSingleItem(itemLink)
+})   
+
+// selected item scraper
 let laptops = [];
-function getSelectedItem(item) {
-    axios.get(`https://api.allorigins.win/get?url=https://www.amazon.com/s?i=computers-intl-ship&bbn=16225007011&rh=n%3A16225007011%2Cn%3A13896617011%2Cn%3A565108%2Cp_89%3A${item}&dc&qid=1627208606&rnid=13896617011&ref=sr_nr_n_2`)
+function getSelectedItem(url) {
+    axios.get(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
         .then((response) => {
-            console.log(response)
-            htmlData = response.data;
+            htmlData = response.data.contents;
             htmlDom = new DOMParser().parseFromString(htmlData, 'text/html');
-            items = htmlDom.getElementsByClassName("sg-col-inner");
+            items = htmlDom.getElementsByClassName("s-result-item");
             laptops = [];
             Array.from(items).forEach((e) => {
                 img = e.getElementsByClassName("s-image")[0]
@@ -46,36 +77,32 @@ function getSelectedItem(item) {
                     });
                 }
             })
-            localStorage.setItem('laptops', JSON.stringify(laptops));
+            appendItems(laptops);
         })
         .catch(function (error) {
             console.log(error)
         })
-        .then(() => {
-            let l = localStorage.getItem('laptops');
-            let a = JSON.parse(l)
-            console.log(a)
-            appendItems(a);
-        })
 }
+
+// attaching scraped results for a selected item to the dom
 function appendItems(a) {
     itemswrap.innerHTML = "";
     a.forEach((e) => {
         itemswrap.innerHTML += `
-                <div class="col">
-                    <div class="card h-100 text-white bg-success">
-                        <a href="${e.src}"
-                            class="glightbox" >
+                <div class="col" >
+                    <div class="card h-100"  style="background-color:#f7fcfc !important;">
+                        <a href="${e.src}" target="_blank" class="pt-3">
                             <img src="${e.src}"
                                 class="card-img-top" alt="...">
                         </a>
                         <div class="card-body">
-                            <h5 class="card-title">${e.name}</h5>
+                            <h5 class="card-title" style="color:#0e1e25; font: 600 1.2rem 'Raleway', sans-serif;">${e.name}</h5>
                         </div>
                         <ul class="list-group list-group-flush">
-                            <li class="list-group-item bg-success text-white"><span class="text-dark fw-bolder">Price: </span>${e.cost}$</li>
-                            <li class="list-group-item bg-success text-white"><span class="text-dark fw-bolder">Website: </span>
-                                <a href="${e.href}" class="text-white">www.amazon.com
+                            <li class="list-group-item" style="background-color:#f7fcfc !important;"><span style="font: 600 1rem 'Raleway', sans-serif;">Price: </span>
+                             <span class="text-success">${e.cost}$ </span></li>
+                            <li class="list-group-item" style="background-color:#f7fcfc !important;"><span style="font: 600 1rem 'Raleway', sans-serif;">Source: </span>
+                                <a href="${e.href}" class="text-success" target="_blank">www.amazon.com
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
                                     class="bi bi-arrow-up-right-square" viewBox="0 0 16 16">
                                     <path fill-rule="evenodd"
@@ -85,7 +112,7 @@ function appendItems(a) {
                             </li>
                         </ul>
                         <div class="card-footer d-flex justify-content-evenly">
-                            <button type="button" class="btn btn-success btn-outline-info" data-bs-toggle="modal"
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal"
                                 data-bs-target="#exampleModal" data-bs-whatever="${e.href}">More info</button>
                         
                         </div>
@@ -95,6 +122,52 @@ function appendItems(a) {
     })
 }
 
+// scrape single item
+function getSingleItem(link) {
+        axios.get(`https://api.allorigins.win/get?url=${encodeURIComponent(link)}`)
+        .then((response) => {
+            htmlData = response.data.contents;
+            htmlDom = new DOMParser().parseFromString(htmlData, 'text/html');
+            let img = htmlDom.getElementById('landingImage');
+            let title = htmlDom.getElementById('productTitle');
+            let price = htmlDom.getElementById('priceblock_ourprice');
+            let spec1 = htmlDom.getElementById('productDetails_techSpec_section_1');
+            mContent.innerHTML = `
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel" style="color:#0e1e25; font: 600 1rem 'Raleway', sans-serif;">${title.textContent}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="card mb-3">
+                        <div class="row g-0">
+                            <div class="col-md-6 col-lg-6">
+                                <img src="${img.getAttribute('data-old-hires')}" class="img-fluid" alt="...">
+                            </div>
+                            <div class="col-md-6 col-lg-6">
+                                <div class="card-body">
+                                    <h5 class="card-title">Specs</h5>
+                                    <p>Price: ${price.textContent}</p>
+                                    <div>${spec1.outerHTML}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`
+        })
+        .catch(function (error) {
+            console.log(error)
+        })
+        
+}
+
+function findResults(e) {
+    e.preventDefault();
+    let sItem = document.getElementById('query');
+    let sValue = sItem.value.trim();
+    sValue = sValue.replace( /\s+/g,'+');
+    let url = `https://www.amazon.com/s?k=${sValue}&rh=n%3A565108&ref=nb_sb_noss`
+    getSelectedItem(url)
+}
 
 
 
