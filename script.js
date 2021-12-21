@@ -164,7 +164,7 @@ function findResults(e) {
     e.preventDefault();
     let sItem = document.getElementById('query');
     let sValue = sItem.value.trim();
-    sValue = sValue.replace( /\s+/g,'+');
+    sValue = sValue.replace( /\s+/g,' ');
     let url = `https://www.amazon.com/s?k=${sValue}&rh=n%3A565108&ref=nb_sb_noss`
     getSelectedItem(url)
 }
