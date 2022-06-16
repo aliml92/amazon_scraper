@@ -1,4 +1,4 @@
-# amazon_scraper
+# amazon scraper
 
 scraping website that retrieves data from amazon.com
 
