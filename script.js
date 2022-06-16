@@ -9,6 +9,7 @@ let price;
 let priceFrac;
 let link;
 
+
 let dropdown = document.getElementsByClassName("dropdown-menu")
 let itemswrap = document.getElementById("items-wrap");
 let modal = document.getElementById('exampleModal');
