@@ -2,4 +2,4 @@
 
 scraping website that retrieves data from amazon.com
 
-![layout](layout.png)
+![layout](example.png)
